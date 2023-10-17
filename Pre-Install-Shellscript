@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Function to check if a command is available
+command_exists() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+sudo apt update
+
+# Install Java if not already installed
+if ! command_exists java; then
+  echo "Installing Java..."
+  sudo apt-get install -y default-jre
+fi
+
+if ! command_exists git; then
+  echo "Installing Git..."
+  sudo apt-get install -y git
+fi
+
+# Install Jenkins if not already installed
+if ! command_exists jenkins; then
+  echo "Installing Jenkins..."
+  wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key |sudo gpg --dearmor -o /usr/share/keyrings/jenkins.gpg
+  sudo sh -c 'echo deb [signed-by=/usr/share/keyrings/jenkins.gpg] http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+  sudo apt-get update
+  sudo apt-get install -y jenkins
+fi
+
+# Install Docker if not already installed
+if ! command_exists docker; then
+  echo "Installing Docker..."
+  sudo apt-get update
+  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  sudo apt-get update
+  sudo apt-get install -y docker-ce
+  sudo usermod -aG docker $USER
+fi
+
+# Install Docker Compose if not already installed
+if ! command_exists docker-compose; then
+  echo "Installing Docker Compose..."
+  sudo curl -SL https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+  sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+  
+fi
+
+echo "Setup complete."
